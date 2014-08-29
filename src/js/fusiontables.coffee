@@ -132,16 +132,41 @@ set_access_token_cookie = (params, callback) ->
       complete: (jqXHR, textStatus) ->
         callback() if callback?
 
+# set the author name using Google profile information
+set_author_name = (callback) ->
+  if get_cookie 'author_name'
+    # $('input[data-type=authuser]').attr('value',get_cookie 'author_name')
+    # $('input[data-type=authuser]').prop('disabled',true)
+  else if get_cookie 'access_token'
+    $.ajax "https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{get_cookie 'access_token'}",
+      type: 'GET'
+      dataType: 'json'
+      crossDomain: true
+      error: (jqXHR, textStatus, errorThrown) ->
+        console.log "AJAX Error: #{textStatus}"
+        # $('.container > h1').after $('<div>').attr('class','alert alert-warning').append('Error retrieving profile info.')
+      success: (data) ->
+        set_cookie('author_name',"#{data['name']} <#{data['email']}>",3600)
+        # $('input[data-type=authuser]').attr('value',get_cookie('author_name'))
+        # $('input[data-type=authuser]').prop('disabled',true)
+      complete: (jqXHR, textStatus) ->
+        callback() if callback?
+
 get_next_gazcomp_pair = ->
   return ['http://pleiades.stoa.org/places/999196280', 'http://sws.geonames.org/8015037/']
 
 build_gazcomp_driver = ->
-    unless get_cookie 'access_token'
-      $('.container > h1').after $('<div>').attr('class','alert alert-warning').attr('id','oauth_access_warning').append('You have not authorized this application to access your Google Fusion Tables. ')
+    if get_cookie 'access_token'
+      gaz = new gazComp.App( 'http://127.0.0.1/gazComp/examples/server_script.py' )
+      gaz.compare( new gazComp.GeonamesData( '2343234' ), new gazComp.PleiadesData( '83473298' ) )
+    else
+      $('body').append $('<div>').attr('class','alert alert-warning').attr('id','oauth_access_warning').append('You have not authorized this application to access your Google Fusion Tables. ')
       $('#oauth_access_warning').append $('<a>').attr('href',google_oauth_url()).append('Click here to authorize.')
       # disable_collection_form()
 
 $(document).ready ->  
+  google_oauth_parameters_for_fusion_tables['client_id'] = default_gazcomp_config['google_client_id']
+
   set_access_token_cookie filter_url_params(parse_query_string())
 
   build_gazcomp_driver()
