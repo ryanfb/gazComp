@@ -53,9 +53,10 @@ gazComp.GeonamesData = function( _id ) {
 }
 gazComp.GeonamesData.prototype.get = function() {
 	var self = this;
+	var geonames_id = (/(?:https?:\/\/)?(?:sws\.geonames\.org\/)?(\d+)\/?.*?/.exec(self.data.id))[1];
 	$.ajax({
 		type: 'GET',
-		url: "http://api.geonames.org/getJSON?formatted=true&geonameId=" + this.data.id + "&username=ryanfb&style=full",
+		url: "http://api.geonames.org/getJSON?formatted=true&geonameId=" + geonames_id + "&username=ryanfb&style=full",
 		timeout: 5000,
 		dataType: 'json',
 		success: function( _data ) { self.convert( _data ) },
@@ -111,9 +112,10 @@ gazComp.PleiadesData = function( _id ) {
 }
 gazComp.PleiadesData.prototype.get = function() {
 	var self = this;
+	var pleiades_id = (/(?:https?:\/\/)?(?:pleiades\.stoa\.org\/places\/)?(\d+)\/?/.exec(self.data.id))[1];
 	$.ajax({
 		type: 'GET',
-		url: "http://pleiades.stoa.org/places/" + this.data.id + "/json",
+		url: "http://pleiades.stoa.org/places/" + pleiades_id + "/json",
 		timeout: 5000,
 		dataType: 'json',
 		success: function( _data ) { self.convert( _data ) },
@@ -142,14 +144,14 @@ gazComp.PleiadesData.prototype.convert = function( _data ) {
 }
 
 /**
- * Retrieve the mouse position in relation to the view
+ * Construct an instance of the app
  *
- * @param { String } _outputURI		The uri to send choice output 
+ * @param { String } _callback		URI or callback function to send choice output 
  */
-gazComp.App = function( _outputUri ) {
+gazComp.App = function( _callback ) {
 	this.id = 'gazComp';
 	this.uiRoot = '#'+this.id;
-	this.outputUri = _outputUri;
+	this.callback = _callback;
 	this.totalComp = 0;
 	this.data_sent = 'GAZCOMP.APP.DATA_SENT';
 	this.send_error = 'GAZCOMP.APP.SEND_ERROR';
@@ -274,28 +276,33 @@ gazComp.App.prototype.errorDisplay = function( _e, _error, _opt ) {
 	console.log( 'Error: ' + _opt['message'] );
 }
 /**
- * HTTP Posts choice to this.outputUri
+ * HTTP Posts choice to this.outputUri or executes callback with g1,g2,choice
  *
  * @param { String } Choice to send to outputUri
  */
 gazComp.App.prototype.send = function( _choice ) {
 	var self = this;
-	var data = {
-		'g1': self.g1.collection + ":" + self.g1.id,
-		'g2': self.g2.collection + ":" + self.g2.id,
-		'choice': _choice
-	}
-	$.ajax({
-		type: 'POST',
-		url: self.outputUri,
-		data: data,
-		success: function( _data ) { 
-			$( document ).trigger( self.data_sent )
-		},
-		error: function( _data, _error, _opt ) {
-			$( document ).trigger( self.send_error, [ _error, _opt ] );
+	if($.type(self.callback) === "string"){
+		var data = {
+			'g1': self.g1.collection + ":" + self.g1.id,
+			'g2': self.g2.collection + ":" + self.g2.id,
+			'choice': _choice
 		}
-	});
+		$.ajax({
+			type: 'POST',
+			url: self.callback,
+			data: data,
+			success: function( _data ) { 
+				$( document ).trigger( self.data_sent )
+			},
+			error: function( _data, _error, _opt ) {
+				$( document ).trigger( self.send_error, [ _error, _opt ] );
+			}
+		});
+	}
+	else {
+		self.callback(self.g1.id,self.g2.id,_choice);
+	}
 }
 /**
  * Builds comparison lists from gazetteer data objects
