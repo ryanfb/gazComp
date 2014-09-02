@@ -51,9 +51,10 @@ gazComp.Data = function( _collection, _id ) {
 gazComp.GeonamesData = function( _id ) {
 	this.data = new gazComp.Data( "Geonames", _id);
 }
+gazComp.GeonamesData.regex = function() {return /(?:https?:\/\/)?(?:sws\.geonames\.org\/)(\d+)\/?.*?/;}
 gazComp.GeonamesData.prototype.get = function() {
 	var self = this;
-	var geonames_id = (/(?:https?:\/\/)?(?:sws\.geonames\.org\/)?(\d+)\/?.*?/.exec(self.data.id))[1];
+	var geonames_id = ((new gazComp.GeonamesData.regex()).exec(self.data.id))[1];
 	$.ajax({
 		type: 'GET',
 		url: "http://api.geonames.org/getJSON?formatted=true&geonameId=" + geonames_id + "&username=ryanfb&style=full",
@@ -110,9 +111,10 @@ gazComp.GeonamesData.prototype.convert = function( _data ) {
 gazComp.PleiadesData = function( _id ) {
 	this.data = new gazComp.Data( "Pleiades", _id);
 }
+gazComp.PleiadesData.regex = function() {return /(?:https?:\/\/)?(?:pleiades\.stoa\.org\/places\/)(\d+)\/?/;}
 gazComp.PleiadesData.prototype.get = function() {
 	var self = this;
-	var pleiades_id = (/(?:https?:\/\/)?(?:pleiades\.stoa\.org\/places\/)?(\d+)\/?/.exec(self.data.id))[1];
+	var pleiades_id = ((new gazComp.PleiadesData.regex()).exec(self.data.id))[1];
 	$.ajax({
 		type: 'GET',
 		url: "http://pleiades.stoa.org/places/" + pleiades_id + "/json",
@@ -141,6 +143,18 @@ gazComp.PleiadesData.prototype.convert = function( _data ) {
 	//  Trigger that the data is ready.
 	//------------------------------------------------------------
 	$( document ).trigger( self.data.ready );
+}
+
+gazComp.URLData = function( _uri ) {
+	if((new gazComp.GeonamesData.regex()).test(_uri)) {
+		return new gazComp.GeonamesData(_uri);
+	}
+	else if((new gazComp.PleiadesData.regex()).test(_uri)) {
+		return new gazComp.PleiadesData(_uri);
+	}
+	else {
+		return null;
+	}
 }
 
 /**
