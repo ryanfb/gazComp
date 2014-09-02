@@ -155,7 +155,6 @@ gazComp.App = function( _callback ) {
 	this.totalComp = 0;
 	this.data_sent = 'GAZCOMP.APP.DATA_SENT';
 	this.send_error = 'GAZCOMP.APP.SEND_ERROR';
-	this.buildUi();
 }
 /**
  * Build the main structure of the user interface
@@ -183,6 +182,9 @@ gazComp.App.prototype.buildUi = function() {
  */
 gazComp.App.prototype.compare = function( _g1, _g2 ) {
 	var self = this;
+	$(self.uiRoot).remove();
+	self.buildUi();
+
 	self.loaded = 0;
 	self.g1 = _g1;
 	self.g2 = _g2;
@@ -199,6 +201,7 @@ gazComp.App.prototype.compare = function( _g1, _g2 ) {
 	//------------------------------------------------------------
 	//  Retrieve data from the data source
 	//------------------------------------------------------------
+	$(document).off( 'GAZCOMP.DATA-READY' );
 	$(document).on( 'GAZCOMP.DATA-READY', function() {
 		self.ready();
 	});
@@ -284,8 +287,8 @@ gazComp.App.prototype.send = function( _choice ) {
 	var self = this;
 	if($.type(self.callback) === "string"){
 		var data = {
-			'g1': self.g1.collection + ":" + self.g1.id,
-			'g2': self.g2.collection + ":" + self.g2.id,
+			'g1': self.g1.data.collection + ":" + self.data.g1.id,
+			'g2': self.g2.data.collection + ":" + self.data.g2.id,
 			'choice': _choice
 		}
 		$.ajax({
@@ -301,7 +304,7 @@ gazComp.App.prototype.send = function( _choice ) {
 		});
 	}
 	else {
-		self.callback(self.g1.id,self.g2.id,_choice);
+		self.callback(self.g1.data.id, self.g2.data.id, _choice);
 	}
 }
 /**
@@ -314,10 +317,12 @@ gazComp.App.prototype.buildCompList = function() {
 	//------------------------------------------------------------
 	//  Build the headers
 	//------------------------------------------------------------
+	$( '#header', this.uiRoot ).empty();
 	$( '#header', this.uiRoot ).append( self.buildWrap( self.g1.data.handle, self.g2.data.handle ) );
 	//------------------------------------------------------------
 	//  Make sure keys defined in display order are first shown
 	//------------------------------------------------------------
+	$( '#comp', this.uiRoot ).empty();
 	for ( var i=0, ii=display.length; i<ii; i++ ) {
 		var key = display[i];
 		var type = templateMap[ key ];
@@ -463,6 +468,7 @@ gazComp.App.prototype.buildInfoWindow = function( _g, _class ) {
  */
 gazComp.App.prototype.mapPlot = function() {
 	var self = this;
+
 	//------------------------------------------------------------
 	//  Get the coordinates and mark them
 	//------------------------------------------------------------
