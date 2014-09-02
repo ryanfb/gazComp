@@ -55,7 +55,7 @@ gazComp.GeonamesData.prototype.get = function() {
 	var self = this;
 	$.ajax({
 		type: 'GET',
-		url: 'data/lutetia-geonames-pretty.json',
+		url: "http://api.geonames.org/getJSON?formatted=true&geonameId=" + this.data.id + "&username=ryanfb&style=full",
 		timeout: 5000,
 		dataType: 'json',
 		success: function( _data ) { self.convert( _data ) },
@@ -73,23 +73,23 @@ gazComp.GeonamesData.prototype.convert = function( _data ) {
 	//------------------------------------------------------------
 	//  Coords
 	//------------------------------------------------------------
-	self.data.clean.coords = [ _data.reprPoint[0], _data.reprPoint[1] ];
+	self.data.clean.coords = [ _data.lat, _data.lng ];
 	//------------------------------------------------------------
 	//  Names
 	//------------------------------------------------------------
-	self.data.clean.names = [];
-	for ( var i=0, ii=_data.names.length; i<ii; i++ ) {
-		self.data.clean.names.push( _data.names[i].name );
-	}
+	self.data.clean.names = [_data.name];
+	// for ( var i=0, ii=_data.names.length; i<ii; i++ ) {
+		// self.data.clean.names.push( _data.names[i].name );
+	// }
 	//------------------------------------------------------------
 	//  Citations
 	//------------------------------------------------------------
-	self.data.clean.citations = [];
-	for ( var i=0, ii=_data.citations.length; i<ii; i++ ) {
-		for ( var key in _data.citations[i] ) {
-			self.data.clean.citations.push( _data.citations[i][key] );
-		}
-	}
+	// self.data.clean.citations = [];
+	// for ( var i=0, ii=_data.citations.length; i<ii; i++ ) {
+		// for ( var key in _data.citations[i] ) {
+			// self.data.clean.citations.push( _data.citations[i][key] );
+		// }
+	// }
 	//------------------------------------------------------------
 	//  Raw data
 	//------------------------------------------------------------
@@ -113,7 +113,7 @@ gazComp.PleiadesData.prototype.get = function() {
 	var self = this;
 	$.ajax({
 		type: 'GET',
-		url: 'data/lutetia-pleiades-pretty.json',
+		url: "http://pleiades.stoa.org/places/" + this.data.id + "/json",
 		timeout: 5000,
 		dataType: 'json',
 		success: function( _data ) { self.convert( _data ) },
