@@ -155,19 +155,23 @@ set_author_name = (callback) ->
         callback() if callback?
 
 get_next_gazcomp_pair = ->
-  return [gazComp.URLData('http://pleiades.stoa.org/places/109126'),gazComp.URLData('http://sws.geonames.org/2988507/')]
+  fusion_tables_query 'SELECT COUNT() FROM 1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP', (fusion_tables_result) ->
+    row_count = fusion_tables_result.rows[0][0]
+    random_offset = Math.floor(Math.random() * row_count)
+    fusion_tables_query "SELECT pleiades_url, geonames_url FROM 1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
+      window.gaz.compare(gazComp.URLData(fusion_tables_result.rows[0][0]), gazComp.URLData(fusion_tables_result.rows[0][1]))
 
 process_gazcomp_result = (g1, g2, choice) ->
   console.log("process_gazcomp_result:")
   console.log(g1)
   console.log(g2)
   console.log(choice)
-  window.gaz.compare(get_next_gazcomp_pair()...)
+  get_next_gazcomp_pair()
 
 build_gazcomp_driver = ->
     if get_cookie 'access_token'
       window.gaz = new gazComp.App( process_gazcomp_result )
-      window.gaz.compare( gazComp.URLData( 'http://sws.geonames.org/8015037/' ), gazComp.URLData( 'http://pleiades.stoa.org/places/999196280' ) )
+      get_next_gazcomp_pair()
     else
       $('body').append $('<div>').attr('class','alert alert-warning').attr('id','oauth_access_warning').append('You have not authorized this application to access your Google Fusion Tables. ')
       $('#oauth_access_warning').append $('<a>').attr('href',google_oauth_url()).append('Click here to authorize.')
