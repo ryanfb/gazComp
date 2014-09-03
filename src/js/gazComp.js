@@ -84,6 +84,7 @@ gazComp.GeonamesData.prototype.convert = function( _data ) {
 	}).map(function(alternateName) {
 		return alternateName.name;
 	})));
+	self.data.clean.description = _data.fcodeName;
 	// for ( var i=0, ii=_data.names.length; i<ii; i++ ) {
 		// self.data.clean.names.push( _data.names[i].name );
 	// }
