@@ -137,6 +137,7 @@ set_access_token_cookie = (params, callback) ->
 # set the author name using Google profile information
 set_author_name = (callback) ->
   if get_cookie 'author_name'
+    callback() if callback?
     # $('input[data-type=authuser]').attr('value',get_cookie 'author_name')
     # $('input[data-type=authuser]').prop('disabled',true)
   else if get_cookie 'access_token'
@@ -155,18 +156,31 @@ set_author_name = (callback) ->
         callback() if callback?
 
 get_next_gazcomp_pair = ->
+  # get the total number of rows
   fusion_tables_query 'SELECT COUNT() FROM 1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP', (fusion_tables_result) ->
     row_count = fusion_tables_result.rows[0][0]
     random_offset = Math.floor(Math.random() * row_count)
+    # select a random row
     fusion_tables_query "SELECT pleiades_url, geonames_url FROM 1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
-      window.gaz.compare(gazComp.URLData(fusion_tables_result.rows[0][0]), gazComp.URLData(fusion_tables_result.rows[0][1]))
+      # check that we haven't already gotten a vote on this pair
+      url1 = fusion_tables_result.rows[0][0]
+      url2 = fusion_tables_result.rows[0][1]
+      fusion_tables_query "SELECT COUNT() FROM 1VTBoUl4C-IuZqyqC2-XNjcyp4x6fjNHUiH17mBB7 WHERE url1 = #{fusion_tables_escape(url1)} AND url2 = #{fusion_tables_escape(url2)}", (fusion_tables_result) =>
+        # check that the random row we selected doesn't already have a vote
+        # TODO: handle all-rows-voted-on case
+        if (!fusion_tables_result.rows?) || fusion_tables_result.rows[0][0] == "0"
+          window.gaz.compare(gazComp.URLData(url1), gazComp.URLData(url2))
+        else
+          get_next_gazcomp_pair()
 
 process_gazcomp_result = (g1, g2, choice) ->
   console.log("process_gazcomp_result:")
   console.log(g1)
   console.log(g2)
   console.log(choice)
-  get_next_gazcomp_pair()
+  set_author_name ->
+    fusion_tables_query "INSERT INTO 1VTBoUl4C-IuZqyqC2-XNjcyp4x6fjNHUiH17mBB7 (url1, url2, choice, author, date) VALUES (#{fusion_tables_escape(g1)}, #{fusion_tables_escape(g2)}, #{fusion_tables_escape(choice)}, #{fusion_tables_escape(get_cookie('author_name'))}, #{fusion_tables_escape((new Date).toISOString())})", (fusion_tables_result) ->
+      get_next_gazcomp_pair()
 
 build_gazcomp_driver = ->
     if get_cookie 'access_token'
