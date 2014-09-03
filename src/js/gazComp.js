@@ -80,7 +80,7 @@ gazComp.GeonamesData.prototype.convert = function( _data ) {
 	//  Names
 	//------------------------------------------------------------
 	self.data.clean.names = _.uniq([_data.name].concat(_data.alternateNames.filter(function(alternateName) {
-		return alternateName.lang != 'link';
+		return ((alternateName.lang != 'link') && (alternateName.lang != 'post'));
 	}).map(function(alternateName) {
 		return alternateName.name;
 	})));
