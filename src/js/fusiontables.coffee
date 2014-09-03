@@ -1,7 +1,11 @@
 FUSION_TABLES_URI = 'https://www.googleapis.com/fusiontables/v1'
 
+gazcomp_config = {}
+
 default_gazcomp_config =
   google_client_id: '69738617359-b0v88ji0eih9h06kdn9v8nvmlenm054e.apps.googleusercontent.com'
+  worklist_fusion_table_id: '1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP'
+  votes_fusion_table_id: '1VTBoUl4C-IuZqyqC2-XNjcyp4x6fjNHUiH17mBB7'
 
 google_oauth_parameters_for_fusion_tables =
   response_type: 'token'
@@ -157,15 +161,15 @@ set_author_name = (callback) ->
 
 get_next_gazcomp_pair = ->
   # get the total number of rows
-  fusion_tables_query 'SELECT COUNT() FROM 1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP', (fusion_tables_result) ->
+  fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.worklist_fusion_table_id}", (fusion_tables_result) ->
     row_count = fusion_tables_result.rows[0][0]
     random_offset = Math.floor(Math.random() * row_count)
     # select a random row
-    fusion_tables_query "SELECT url1, url2 FROM 1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
+    fusion_tables_query "SELECT url1, url2 FROM #{gazcomp_config.worklist_fusion_table_id} OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
       # check that we haven't already gotten a vote on this pair
       url1 = fusion_tables_result.rows[0][0]
       url2 = fusion_tables_result.rows[0][1]
-      fusion_tables_query "SELECT COUNT() FROM 1VTBoUl4C-IuZqyqC2-XNjcyp4x6fjNHUiH17mBB7 WHERE url1 = #{fusion_tables_escape(url1)} AND url2 = #{fusion_tables_escape(url2)}", (fusion_tables_result) =>
+      fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.votes_fusion_table_id} WHERE url1 = #{fusion_tables_escape(url1)} AND url2 = #{fusion_tables_escape(url2)}", (fusion_tables_result) =>
         # check that the random row we selected doesn't already have a vote
         # TODO: handle all-rows-voted-on case
         if (!fusion_tables_result.rows?) || fusion_tables_result.rows[0][0] == "0"
@@ -179,7 +183,7 @@ process_gazcomp_result = (g1, g2, choice) ->
   console.log(g2)
   console.log(choice)
   set_author_name ->
-    fusion_tables_query "INSERT INTO 1VTBoUl4C-IuZqyqC2-XNjcyp4x6fjNHUiH17mBB7 (url1, url2, choice, author, date) VALUES (#{fusion_tables_escape(g1)}, #{fusion_tables_escape(g2)}, #{fusion_tables_escape(choice)}, #{fusion_tables_escape(get_cookie('author_name'))}, #{fusion_tables_escape((new Date).toISOString())})", (fusion_tables_result) ->
+    fusion_tables_query "INSERT INTO #{gazcomp_config.votes_fusion_table_id} (url1, url2, choice, author, date) VALUES (#{fusion_tables_escape(g1)}, #{fusion_tables_escape(g2)}, #{fusion_tables_escape(choice)}, #{fusion_tables_escape(get_cookie('author_name'))}, #{fusion_tables_escape((new Date).toISOString())})", (fusion_tables_result) ->
       get_next_gazcomp_pair()
 
 build_gazcomp_driver = ->
