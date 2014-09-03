@@ -79,7 +79,11 @@ gazComp.GeonamesData.prototype.convert = function( _data ) {
 	//------------------------------------------------------------
 	//  Names
 	//------------------------------------------------------------
-	self.data.clean.names = [_data.name];
+	self.data.clean.names = _.uniq([_data.name].concat(_data.alternateNames.filter(function(alternateName) {
+		return alternateName.lang != 'link';
+	}).map(function(alternateName) {
+		return alternateName.name;
+	})));
 	// for ( var i=0, ii=_data.names.length; i<ii; i++ ) {
 		// self.data.clean.names.push( _data.names[i].name );
 	// }
