@@ -161,7 +161,7 @@ get_next_gazcomp_pair = ->
     row_count = fusion_tables_result.rows[0][0]
     random_offset = Math.floor(Math.random() * row_count)
     # select a random row
-    fusion_tables_query "SELECT pleiades_url, geonames_url FROM 1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
+    fusion_tables_query "SELECT url1, url2 FROM 1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
       # check that we haven't already gotten a vote on this pair
       url1 = fusion_tables_result.rows[0][0]
       url2 = fusion_tables_result.rows[0][1]
@@ -191,7 +191,9 @@ build_gazcomp_driver = ->
       $('#oauth_access_warning').append $('<a>').attr('href',google_oauth_url()).append('Click here to authorize.')
       # disable_collection_form()
 
-$(document).ready ->  
-  google_oauth_parameters_for_fusion_tables['client_id'] = default_gazcomp_config['google_client_id']
+$(document).ready ->
+  # merge parameters, overwriting defaults if they're defined in the global window.gazcomp_config
+  gazcomp_config = $.extend({}, default_gazcomp_config, window.gazcomp_config)
+  google_oauth_parameters_for_fusion_tables['client_id'] = gazcomp_config['google_client_id']
 
   set_access_token_cookie(filter_url_params(parse_query_string()), build_gazcomp_driver)
