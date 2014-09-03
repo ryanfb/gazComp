@@ -131,6 +131,8 @@ set_access_token_cookie = (params, callback) ->
         $('#collection_select').change()
       complete: (jqXHR, textStatus) ->
         callback() if callback?
+  else
+    callback() if callback?
 
 # set the author name using Google profile information
 set_author_name = (callback) ->
@@ -174,6 +176,4 @@ build_gazcomp_driver = ->
 $(document).ready ->  
   google_oauth_parameters_for_fusion_tables['client_id'] = default_gazcomp_config['google_client_id']
 
-  set_access_token_cookie filter_url_params(parse_query_string())
-
-  build_gazcomp_driver()
+  set_access_token_cookie(filter_url_params(parse_query_string()), build_gazcomp_driver)
