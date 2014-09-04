@@ -197,6 +197,8 @@ build_gazcomp_driver = ->
 
 $(document).ready ->
   # merge parameters, overwriting defaults if they're defined in the global window.gazcomp_config
+  if window.FUSION_TABLES_URI?
+    FUSION_TABLES_URI = window.FUSION_TABLES_URI
   gazcomp_config = $.extend({}, default_gazcomp_config, window.gazcomp_config)
   google_oauth_parameters_for_fusion_tables['client_id'] = gazcomp_config['google_client_id']
 
