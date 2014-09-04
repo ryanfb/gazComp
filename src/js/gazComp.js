@@ -4,7 +4,7 @@ gazComp.Data = function( _collection, _id ) {
 	this.id = _id;
 	this.handle = '\
 		<span class="collection">'+ this.collection +'</span>:\
-		<span class="id">'+ this.id +'</span>\
+		<a href="' + this.id + '" target="_blank">'+ this.id +'</a>\
 	';
 	//------------------------------------------------------------
 	//  Sample gazComp data object
@@ -138,7 +138,7 @@ gazComp.PleiadesData.prototype.convert = function( _data ) {
 	//  Convert the data into a standard gazComp.Data object
 	//------------------------------------------------------------
 	self.data.clean.coords = [ _data.reprPoint[1], _data.reprPoint[0] ];
-	self.data.clean.names = _data.names;
+	self.data.clean.names = _.uniq([_data.title].concat(_data.names));
 	self.data.clean.description = _data.description;
 	//------------------------------------------------------------
 	//  Raw data
