@@ -18,7 +18,7 @@ gazComp.Data = function( _collection, _id ) {
 	//------------------------------------------------------------
 	//  What order the items are listed
 	//------------------------------------------------------------
-	this.displayOrder = [ 'coords', 'names', 'description', 'citations', 'raw' ];
+	this.displayOrder = [ 'coords', 'names', 'description', 'related', 'raw' ];
 	//------------------------------------------------------------
 	//  Different types of templates to display items
 	//------------------------------------------------------------
@@ -30,7 +30,7 @@ gazComp.Data = function( _collection, _id ) {
 		'coords': 'list',
 		'names': 'list',
 		'description': 'string',
-		'citations': 'linkList',
+		'related': 'linkList',
 		'raw': 'json'
 	};
 	this.src = null;
@@ -199,7 +199,7 @@ gazComp.App.prototype.buildUi = function() {
  * @param { Obj } _domId 		The id attribute of the root UI element
  * @param { Obj } _outputUri	The uri to send choice output 
  */
-gazComp.App.prototype.compare = function( _g1, _g2 ) {
+gazComp.App.prototype.compare = function( _g1, _g2, _callback ) {
 	var self = this;
 	$(self.uiRoot).remove();
 	self.buildUi();
@@ -222,7 +222,12 @@ gazComp.App.prototype.compare = function( _g1, _g2 ) {
 	//------------------------------------------------------------
 	$(document).off( 'GAZCOMP.DATA-READY' );
 	$(document).on( 'GAZCOMP.DATA-READY', function() {
-		self.ready();
+		if (_callback != null) {
+			self.ready(_callback);
+		}
+		else {
+			self.ready();
+		}
 	});
 	self.g1.get();
 	self.g2.get();
@@ -230,12 +235,15 @@ gazComp.App.prototype.compare = function( _g1, _g2 ) {
 /**
  * Data sources are loaded... so now you are ready.
  */
-gazComp.App.prototype.ready = function() {
+gazComp.App.prototype.ready = function(_callback) {
 	var self = this;
 	self.loaded += 1;
 	if ( self.loaded > 1 ) {
 		self.mapPlot();
 		self.buildCompList();
+		if(_callback != null) {
+			_callback();
+		}
 	}
 }
 /**

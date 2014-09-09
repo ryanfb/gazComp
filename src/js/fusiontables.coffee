@@ -56,8 +56,8 @@ check_table_access = (table_id, callback) ->
       crossDomain: true
       error: (jqXHR, textStatus, errorThrown) ->
         console.log "AJAX Error: #{textStatus}"
-        $('.container > h1').after $('<div>').attr('class','alert alert-error').attr('id','collection_access_error').append('You do not have permission to access this collection.')
-        disable_collection_form()
+        # $('.container > h1').after $('<div>').attr('class','alert alert-error').attr('id','collection_access_error').append('You do not have permission to access this collection.')
+        # disable_collection_form()
       success: (data) ->
         console.log data
       complete: (jqXHR, textStatus) ->
@@ -79,11 +79,11 @@ fusion_tables_query = (query, callback) ->
           sql: query
         error: (jqXHR, textStatus, errorThrown) ->
           console.log "AJAX Error: #{textStatus}"
-          $('#collection_form').after $('<div>').attr('class','alert alert-error').attr('id','submit_error').append("Error submitting data: #{textStatus}")
-          scroll_to_bottom()
-          $('#submit_error').delay(1800).fadeOut 1800, ->
-            $(this).remove()
-            $('#collection_select').change()
+          # $('#collection_form').after $('<div>').attr('class','alert alert-error').attr('id','submit_error').append("Error submitting data: #{textStatus}")
+          # scroll_to_bottom()
+          # $('#submit_error').delay(1800).fadeOut 1800, ->
+            # $(this).remove()
+            # $('#collection_select').change()
         success: (data) ->
           console.log data
           if callback?
@@ -116,6 +116,15 @@ filter_url_params = (params, filtered_params) ->
   history.replaceState(null,'',window.location.href.replace("#{location.hash}",hash_string))
   return params
 
+set_cookie_expiration_callback = ->
+  if get_cookie('access_token_expires_at')
+    expires_in = get_cookie('access_token_expires_at') - (new Date()).getTime()
+    console.log(expires_in)
+    setTimeout ( ->
+        console.log("cookie expired")
+        window.location.reload()
+      ), expires_in
+
 # write a Google OAuth access token into a cached cookie that should expire when the access token does
 set_access_token_cookie = (params, callback) ->
   if params['state']?
@@ -132,7 +141,6 @@ set_access_token_cookie = (params, callback) ->
       success: (data) ->
         set_cookie('access_token',params['access_token'],params['expires_in'])
         set_cookie('access_token_expires_at',expires_in_to_date(params['expires_in']).getTime(),params['expires_in'])
-        $('#collection_select').change()
       complete: (jqXHR, textStatus) ->
         callback() if callback?
   else
@@ -159,6 +167,18 @@ set_author_name = (callback) ->
       complete: (jqXHR, textStatus) ->
         callback() if callback?
 
+add_related_url = (url, group) ->
+  console.log(group + ": " + url)
+  related_link = $('<a>').attr('href',url).attr('target','_blank').append(url)
+  $(".g#{group} > div.key:contains(related)").siblings('div.val').first().append(related_link)
+
+load_related_urls = (url, other_url, group) ->
+  other_group = if (group == 1) then 2 else 1
+  fusion_tables_query "SELECT url#{other_group} FROM #{gazcomp_config.worklist_fusion_table_id} WHERE url#{group} = #{fusion_tables_escape(url)} AND url#{other_group} NOT EQUAL TO #{fusion_tables_escape(other_url)}", (fusion_tables_result) ->
+    console.log('related urls')
+    if fusion_tables_result.rows?
+      add_related_url(url[0], group) for url in fusion_tables_result.rows
+
 get_next_gazcomp_pair = ->
   # get the total number of rows
   fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.worklist_fusion_table_id}", (fusion_tables_result) ->
@@ -173,7 +193,14 @@ get_next_gazcomp_pair = ->
         # check that the random row we selected doesn't already have a vote
         # TODO: handle all-rows-voted-on case
         if (!fusion_tables_result.rows?) || fusion_tables_result.rows[0][0] == "0"
-          window.gaz.compare(gazComp.URLData(url1), gazComp.URLData(url2))
+          window.gaz.compare(gazComp.URLData(url1), gazComp.URLData(url2), ->
+            console.log("ready: " + url1 + ", " + url2)
+            load_related_urls(url1,url2,1)
+            load_related_urls(url2,url1,2)
+            setTimeout ( ->
+              window.gaz.sizeCompList()
+            ), 100
+          )
         else
           get_next_gazcomp_pair()
 
@@ -182,14 +209,16 @@ process_gazcomp_result = (g1, g2, choice) ->
   console.log(g1)
   console.log(g2)
   console.log(choice)
-  set_author_name ->
-    fusion_tables_query "INSERT INTO #{gazcomp_config.votes_fusion_table_id} (url1, url2, choice, author, date) VALUES (#{fusion_tables_escape(g1)}, #{fusion_tables_escape(g2)}, #{fusion_tables_escape(choice)}, #{fusion_tables_escape(get_cookie('author_name'))}, #{fusion_tables_escape((new Date).toISOString())})", (fusion_tables_result) ->
-      get_next_gazcomp_pair()
+  
+  fusion_tables_query "INSERT INTO #{gazcomp_config.votes_fusion_table_id} (url1, url2, choice, author, date) VALUES (#{fusion_tables_escape(g1)}, #{fusion_tables_escape(g2)}, #{fusion_tables_escape(choice)}, #{fusion_tables_escape(get_cookie('author_name'))}, #{fusion_tables_escape((new Date).toISOString())})", (fusion_tables_result) ->
+    get_next_gazcomp_pair()
 
 build_gazcomp_driver = ->
     if get_cookie 'access_token'
-      window.gaz = new gazComp.App( process_gazcomp_result )
-      get_next_gazcomp_pair()
+      set_author_name ->
+        set_cookie_expiration_callback()
+        window.gaz = new gazComp.App( process_gazcomp_result )
+        get_next_gazcomp_pair()
     else
       $('body').append $('<div>').attr('class','alert alert-warning').attr('id','oauth_access_warning').append('You have not authorized this application to access your Google Fusion Tables. ')
       $('#oauth_access_warning').append $('<a>').attr('href',google_oauth_url()).append('Click here to authorize.')
