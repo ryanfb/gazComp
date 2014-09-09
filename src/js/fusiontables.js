@@ -235,16 +235,15 @@
     var other_group;
     other_group = group === 1 ? 2 : 1;
     return fusion_tables_query("SELECT url" + other_group + " FROM " + gazcomp_config.worklist_fusion_table_id + " WHERE url" + group + " = " + (fusion_tables_escape(url)) + " AND url" + other_group + " NOT EQUAL TO " + (fusion_tables_escape(other_url)), function(fusion_tables_result) {
-      var _i, _len, _ref, _results;
+      var _i, _len, _ref;
       console.log('related urls');
       if (fusion_tables_result.rows != null) {
         _ref = fusion_tables_result.rows;
-        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           url = _ref[_i];
-          _results.push(add_related_url(url[0], group));
+          add_related_url(url[0], group);
         }
-        return _results;
+        return window.gaz.sizeCompList();
       }
     });
   };
@@ -264,10 +263,7 @@
             return window.gaz.compare(gazComp.URLData(url1), gazComp.URLData(url2), function() {
               console.log("ready: " + url1 + ", " + url2);
               load_related_urls(url1, url2, 1);
-              load_related_urls(url2, url1, 2);
-              return setTimeout((function() {
-                return window.gaz.sizeCompList();
-              }), 100);
+              return load_related_urls(url2, url1, 2);
             });
           } else {
             return get_next_gazcomp_pair();
