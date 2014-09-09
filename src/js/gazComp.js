@@ -291,7 +291,7 @@ gazComp.App.prototype.start = function() {
 	//  Window resize triggered redisplays
 	//------------------------------------------------------------
 	$( window ).resize( function(){
-		self.sizeCompList();
+		// self.sizeCompList();
 		self.mapFit()
 	});
 }
@@ -362,7 +362,7 @@ gazComp.App.prototype.buildCompList = function() {
 	//------------------------------------------------------------
 	//  Make resize items so they're the same height
 	//------------------------------------------------------------
-	self.sizeCompList();
+	// self.sizeCompList();
 }
 /**
  * Resize the comparison list

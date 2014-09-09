@@ -178,7 +178,7 @@ load_related_urls = (url, other_url, group) ->
     console.log('related urls')
     if fusion_tables_result.rows?
       add_related_url(url[0], group) for url in fusion_tables_result.rows
-      window.gaz.sizeCompList()
+      # window.gaz.sizeCompList()
 
 get_next_gazcomp_pair = ->
   # get the total number of rows
