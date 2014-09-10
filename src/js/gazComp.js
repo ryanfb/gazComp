@@ -315,8 +315,8 @@ gazComp.App.prototype.send = function( _choice ) {
 	var self = this;
 	if($.type(self.callback) === "string"){
 		var data = {
-			'g1': self.g1.data.collection + ":" + self.data.g1.id,
-			'g2': self.g2.data.collection + ":" + self.data.g2.id,
+			'g1': self.g1.data.collection + ":" + self.g1.data.id,
+			'g2': self.g2.data.collection + ":" + self.g2.data.id,
 			'choice': _choice
 		}
 		$.ajax({
