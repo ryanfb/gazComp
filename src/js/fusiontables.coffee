@@ -142,9 +142,9 @@ set_access_token_cookie = (params, callback) ->
         set_cookie('access_token',params['access_token'],params['expires_in'])
         set_cookie('access_token_expires_at',expires_in_to_date(params['expires_in']).getTime(),params['expires_in'])
       complete: (jqXHR, textStatus) ->
-        callback() if callback?
+        callback(params) if callback?
   else
-    callback() if callback?
+    callback(params) if callback?
 
 # set the author name using Google profile information
 set_author_name = (callback) ->
@@ -169,7 +169,10 @@ set_author_name = (callback) ->
 
 add_related_url = (url, group) ->
   console.log(group + ": " + url)
-  related_link = $('<a>').attr('href',url).attr('target','_blank').append(url)
+  url1 = if (group == 1) then window.gaz.g1.data.id else url
+  url2 = if (group == 2) then window.gaz.g2.data.id else url
+  gazcomp_url = window.location.href.replace("#{location.hash}",'') + '#url1=' + url1 + '&url2=' + url2
+  related_link = $('<a>').attr('href',gazcomp_url).attr('target','_blank').append(url)
   $(".g#{group} > div.key:contains(related)").siblings('div.val').first().append(related_link)
 
 load_related_urls = (url, other_url, group) ->
@@ -179,6 +182,13 @@ load_related_urls = (url, other_url, group) ->
     if fusion_tables_result.rows?
       add_related_url(url[0], group) for url in fusion_tables_result.rows
       # window.gaz.sizeCompList()
+
+load_gazcomp_pair = (url1, url2) ->
+  window.gaz.compare(gazComp.URLData(url1), gazComp.URLData(url2), ->
+    console.log("ready: " + url1 + ", " + url2)
+    load_related_urls(url1,url2,1)
+    load_related_urls(url2,url1,2)
+  )
 
 get_next_gazcomp_pair = ->
   # get the total number of rows
@@ -194,11 +204,7 @@ get_next_gazcomp_pair = ->
         # check that the random row we selected doesn't already have a vote
         # TODO: handle all-rows-voted-on case
         if (!fusion_tables_result.rows?) || fusion_tables_result.rows[0][0] == "0"
-          window.gaz.compare(gazComp.URLData(url1), gazComp.URLData(url2), ->
-            console.log("ready: " + url1 + ", " + url2)
-            load_related_urls(url1,url2,1)
-            load_related_urls(url2,url1,2)
-          )
+          load_gazcomp_pair(url1,url2)
         else
           get_next_gazcomp_pair()
 
@@ -211,12 +217,15 @@ process_gazcomp_result = (g1, g2, choice) ->
   fusion_tables_query "INSERT INTO #{gazcomp_config.votes_fusion_table_id} (url1, url2, choice, author, date) VALUES (#{fusion_tables_escape(g1)}, #{fusion_tables_escape(g2)}, #{fusion_tables_escape(choice)}, #{fusion_tables_escape(get_cookie('author_name'))}, #{fusion_tables_escape((new Date).toISOString())})", (fusion_tables_result) ->
     get_next_gazcomp_pair()
 
-build_gazcomp_driver = ->
+build_gazcomp_driver = (params) ->
     if get_cookie 'access_token'
       set_author_name ->
         set_cookie_expiration_callback()
         window.gaz = new gazComp.App( process_gazcomp_result )
-        get_next_gazcomp_pair()
+        if (params['url1']? and params['url2']?)
+          load_gazcomp_pair(params['url1'],params['url2'])
+        else
+          get_next_gazcomp_pair()
     else
       $('body').append $('<div>').attr('class','alert alert-warning').attr('id','oauth_access_warning').append('You have not authorized this application to access your Google Fusion Tables. ')
       $('#oauth_access_warning').append $('<a>').attr('href',google_oauth_url()).append('Click here to authorize.')
