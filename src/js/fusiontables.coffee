@@ -77,6 +77,14 @@ fusion_tables_query = (query, callback) ->
         crossDomain: true
         data:
           sql: query
+        statusCode: {
+          401: (jqXHR, textStatus, errorThrown) ->
+            console.log 'authentication error'
+            delete_cookie('access_token')
+            delete_cookie('access_token_expires_at')
+            delete_cookie('author_name')
+            window.location.reload()
+        }
         error: (jqXHR, textStatus, errorThrown) ->
           console.log "AJAX Error: #{textStatus}"
           # $('#collection_form').after $('<div>').attr('class','alert alert-error').attr('id','submit_error').append("Error submitting data: #{textStatus}")
@@ -94,6 +102,14 @@ fusion_tables_query = (query, callback) ->
         cache: false
         dataType: 'json'
         crossDomain: true
+        statusCode: {
+          401: (jqXHR, textStatus, errorThrown) ->
+            console.log 'authentication error'
+            delete_cookie('access_token')
+            delete_cookie('access_token_expires_at')
+            delete_cookie('author_name')
+            window.location.reload()
+        }
         error: (jqXHR, textStatus, errorThrown) ->
           console.log "AJAX Error: #{textStatus}"
         success: (data) ->

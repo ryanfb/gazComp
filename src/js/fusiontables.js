@@ -107,6 +107,15 @@
           data: {
             sql: query
           },
+          statusCode: {
+            401: function(jqXHR, textStatus, errorThrown) {
+              console.log('authentication error');
+              delete_cookie('access_token');
+              delete_cookie('access_token_expires_at');
+              delete_cookie('author_name');
+              return window.location.reload();
+            }
+          },
           error: function(jqXHR, textStatus, errorThrown) {
             return console.log("AJAX Error: " + textStatus);
           },
@@ -123,6 +132,15 @@
           cache: false,
           dataType: 'json',
           crossDomain: true,
+          statusCode: {
+            401: function(jqXHR, textStatus, errorThrown) {
+              console.log('authentication error');
+              delete_cookie('access_token');
+              delete_cookie('access_token_expires_at');
+              delete_cookie('author_name');
+              return window.location.reload();
+            }
+          },
           error: function(jqXHR, textStatus, errorThrown) {
             return console.log("AJAX Error: " + textStatus);
           },
