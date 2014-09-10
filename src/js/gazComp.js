@@ -186,6 +186,7 @@ gazComp.App.prototype.buildUi = function() {
 				<a href="" id="yes" class="choice">&#x2713;</a>\
 				<a href="" id="no" class="choice">&#x2717;</a>\
 				<a href="" id="dunno" class="choice">?</a>\
+				<a href="" id="skip" class="choice">&#x2192;</a>\
 			</div>\
 			<div id="header"></div>\
 			<div id="comp"></div>\

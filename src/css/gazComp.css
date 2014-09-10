@@ -15,7 +15,7 @@ body {
 #gazComp #choices {
 	position: absolute;
 	left: 50%;
-	margin-left: -102px;
+	margin-left: -148px;
 	margin-top: -48px;
 	background-color: rgba( 0,0,0,0.5 );
 	z-index: 9999;
@@ -36,15 +36,18 @@ body {
 #gazComp .choice#no {
 	color: #FF3333;
 }
+#gazComp .choice#skip {
+	color: #FFFFFF;
+}
 #gazComp .choice#dunno {
 	font-style: italic;
 	color: #CCCCFF;
 }
 #gazComp #header {
-	background: -webkit-linear-gradient(left, #FFFFAA 49%, #AAFFFF 49%);
-	background: -moz-linear-gradient(left, #FFFFAA 49%, #AAFFFF 49%);
-	background: -o-linear-gradient(left, #FFFFAA 49%, #AAFFFF 49%);
-	background: linear-gradient(left, #FFFFAA 49%, #AAFFFF 49%);
+	background: -webkit-linear-gradient(left, #FFFFAA 50%, #AAFFFF 50%);
+	background: -moz-linear-gradient(left, #FFFFAA 50%, #AAFFFF 50%);
+	background: -o-linear-gradient(left, #FFFFAA 50%, #AAFFFF 50%);
+	background: linear-gradient(left, #FFFFAA 50%, #AAFFFF 50%);
 }
 #gazComp #header,
 #gazComp #comp {
@@ -70,10 +73,10 @@ body {
 #gazComp #comp .item {
 	margin-bottom: 2px;
 	word-break:break-all;
-	background: -webkit-linear-gradient(left, #FFFFDD 49%, #DDFFFF 49%) !important;
-	background: -moz-linear-gradient(left, #FFFFDD 49%, #DDFFFF 49%) !important;
-	background: -o-linear-gradient(left, #FFFFDD 49%, #DDFFFF 49%) !important;
-	background: linear-gradient(left, #FFFFDD 49%, #DDFFFF 49%) !important;
+	background: -webkit-linear-gradient(left, #FFFFDD 50%, #DDFFFF 50%) !important;
+	background: -moz-linear-gradient(left, #FFFFDD 50%, #DDFFFF 50%) !important;
+	background: -o-linear-gradient(left, #FFFFDD 50%, #DDFFFF 50%) !important;
+	background: linear-gradient(left, #FFFFDD 50%, #DDFFFF 50%) !important;
 }
 #gazComp #comp .gaz .key {
 	font-size: 10px;
