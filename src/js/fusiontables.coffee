@@ -217,7 +217,7 @@ get_next_gazcomp_pair = (depth = 0) ->
       # check that we haven't already gotten a vote on this pair
       url1 = fusion_tables_result.rows[0][0]
       url2 = fusion_tables_result.rows[0][1]
-      fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.votes_fusion_table_id} WHERE url1 = #{fusion_tables_escape(url1)} AND url2 = #{fusion_tables_escape(url2)} AND choice NOT EQUAL TO 'skip'", (fusion_tables_result) =>
+      fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.votes_fusion_table_id} WHERE url1 = #{fusion_tables_escape(url1)} AND url2 = #{fusion_tables_escape(url2)} AND choice NOT EQUAL TO 'skip' AND choice NOT EQUAL TO 'dunno'", (fusion_tables_result) =>
         # check that the random row we selected doesn't already have a vote
         if (depth > 2) || (!fusion_tables_result.rows?) || fusion_tables_result.rows[0][0] == "0"
           load_gazcomp_pair(url1,url2)

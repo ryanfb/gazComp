@@ -293,7 +293,7 @@
           _this = this;
         url1 = fusion_tables_result.rows[0][0];
         url2 = fusion_tables_result.rows[0][1];
-        return fusion_tables_query("SELECT COUNT() FROM " + gazcomp_config.votes_fusion_table_id + " WHERE url1 = " + (fusion_tables_escape(url1)) + " AND url2 = " + (fusion_tables_escape(url2)) + " AND choice NOT EQUAL TO 'skip'", function(fusion_tables_result) {
+        return fusion_tables_query("SELECT COUNT() FROM " + gazcomp_config.votes_fusion_table_id + " WHERE url1 = " + (fusion_tables_escape(url1)) + " AND url2 = " + (fusion_tables_escape(url2)) + " AND choice NOT EQUAL TO 'skip' AND choice NOT EQUAL TO 'dunno'", function(fusion_tables_result) {
           if ((depth > 2) || (fusion_tables_result.rows == null) || fusion_tables_result.rows[0][0] === "0") {
             return load_gazcomp_pair(url1, url2);
           } else {
