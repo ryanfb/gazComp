@@ -229,7 +229,7 @@ process_gazcomp_result = (g1, g2, choice) ->
   console.log(g1)
   console.log(g2)
   console.log(choice)
-  
+  history.replaceState(null,'',window.location.href.replace("#{location.hash}",''))
   fusion_tables_query "INSERT INTO #{gazcomp_config.votes_fusion_table_id} (url1, url2, choice, author, date) VALUES (#{fusion_tables_escape(g1)}, #{fusion_tables_escape(g2)}, #{fusion_tables_escape(choice)}, #{fusion_tables_escape(get_cookie('author_name'))}, #{fusion_tables_escape((new Date).toISOString())})", (fusion_tables_result) ->
     get_next_gazcomp_pair()
 
