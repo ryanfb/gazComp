@@ -137,7 +137,9 @@ gazComp.PleiadesData.prototype.convert = function( _data ) {
 	//------------------------------------------------------------
 	//  Convert the data into a standard gazComp.Data object
 	//------------------------------------------------------------
-	self.data.clean.coords = [ _data.reprPoint[1], _data.reprPoint[0] ];
+	if(_data.reprPoint != null) {
+		self.data.clean.coords = [ _data.reprPoint[1], _data.reprPoint[0] ];
+	}
 	self.data.clean.names = _.uniq([_data.title].concat(_data.names));
 	self.data.clean.description = _data.description;
 	//------------------------------------------------------------
@@ -500,32 +502,36 @@ gazComp.App.prototype.mapPlot = function() {
 	//------------------------------------------------------------
 	//  Get the coordinates and mark them
 	//------------------------------------------------------------
-	var c1 = new google.maps.LatLng( self.g1.data.clean.coords[0], self.g1.data.clean.coords[1] );
-	var c2 = new google.maps.LatLng( self.g2.data.clean.coords[0], self.g2.data.clean.coords[1] );
 	//------------------------------------------------------------
 	//  Marker and info-box one
 	//------------------------------------------------------------
-	self.mark1 = new google.maps.Marker({
-		position: c1,
-		title: 'g1'
-	});
-	self.mark1.setMap( self.map );
-	self.info1 = new google.maps.InfoWindow({
-		content: self.buildInfoWindow( self.g1, 'g1' )
-	});
-	self.info1.open( self.map, self.mark1 );
+	if(self.g1.data.clean.coords != null) {
+		var c1 = new google.maps.LatLng( self.g1.data.clean.coords[0], self.g1.data.clean.coords[1] );
+		self.mark1 = new google.maps.Marker({
+			position: c1,
+			title: 'g1'
+		});
+		self.mark1.setMap( self.map );
+		self.info1 = new google.maps.InfoWindow({
+			content: self.buildInfoWindow( self.g1, 'g1' )
+		});
+		self.info1.open( self.map, self.mark1 );
+	}
 	//------------------------------------------------------------
 	//  Marker and info-box two
 	//------------------------------------------------------------
-	self.mark2 = new google.maps.Marker({
-		position: c2,
-		title: 'g2'
-	});
-	self.mark2.setMap( self.map );
-	self.info2 = new google.maps.InfoWindow({
-		content: self.buildInfoWindow( self.g2, 'g2' )
-	});
-	self.info2.open( self.map, self.mark2 );
+	if(self.g2.data.clean.coords != null) {
+		var c2 = new google.maps.LatLng( self.g2.data.clean.coords[0], self.g2.data.clean.coords[1] );
+		self.mark2 = new google.maps.Marker({
+			position: c2,
+			title: 'g2'
+		});
+		self.mark2.setMap( self.map );
+		self.info2 = new google.maps.InfoWindow({
+			content: self.buildInfoWindow( self.g2, 'g2' )
+		});
+		self.info2.open( self.map, self.mark2 );
+	}
 	//------------------------------------------------------------
 	//  Set the map's viewport so marker bounding box is visible
 	//------------------------------------------------------------
@@ -539,9 +545,14 @@ gazComp.App.prototype.mapFit = function() {
 	//------------------------------------------------------------
 	//  Get the coordinates and mark them
 	//------------------------------------------------------------
-	var c1 = new google.maps.LatLng( self.g1.data.clean.coords[0], self.g1.data.clean.coords[1] );
-	var c2 = new google.maps.LatLng( self.g2.data.clean.coords[0], self.g2.data.clean.coords[1] );
-	var cBounds = new Array ( c1, c2 );
+	var cBounds = new Array ( );
+	if(self.g1.data.clean.coords != null) {
+		cBounds.push(new google.maps.LatLng( self.g1.data.clean.coords[0], self.g1.data.clean.coords[1] ));
+	}
+	if(self.g2.data.clean.coords != null) {
+		cBounds.push(new google.maps.LatLng( self.g2.data.clean.coords[0], self.g2.data.clean.coords[1] ));
+	}
+	
 	var bBox = new google.maps.LatLngBounds();
 	for ( var i = 0, len = cBounds.length; i < len; i++ ) {
 		bBox.extend ( cBounds[i] );
