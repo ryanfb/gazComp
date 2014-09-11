@@ -278,21 +278,26 @@
     });
   };
 
-  get_next_gazcomp_pair = function() {
-    return fusion_tables_query("SELECT COUNT() FROM " + gazcomp_config.worklist_fusion_table_id + " WHERE choice IN ('', 'skip')", function(fusion_tables_result) {
+  get_next_gazcomp_pair = function(depth) {
+    var vote_filter_condition;
+    if (depth == null) {
+      depth = 0;
+    }
+    vote_filter_condition = depth > 2 ? "" : "WHERE choice = ''";
+    return fusion_tables_query("SELECT COUNT() FROM " + gazcomp_config.worklist_fusion_table_id + " " + vote_filter_condition, function(fusion_tables_result) {
       var random_offset, row_count;
       row_count = fusion_tables_result.rows[0][0];
       random_offset = Math.floor(Math.random() * row_count);
-      return fusion_tables_query("SELECT url1, url2 FROM " + gazcomp_config.worklist_fusion_table_id + " WHERE choice IN ('','skip') OFFSET " + random_offset + " LIMIT 1", function(fusion_tables_result) {
+      return fusion_tables_query("SELECT url1, url2 FROM " + gazcomp_config.worklist_fusion_table_id + " " + vote_filter_condition + " OFFSET " + random_offset + " LIMIT 1", function(fusion_tables_result) {
         var url1, url2,
           _this = this;
         url1 = fusion_tables_result.rows[0][0];
         url2 = fusion_tables_result.rows[0][1];
         return fusion_tables_query("SELECT COUNT() FROM " + gazcomp_config.votes_fusion_table_id + " WHERE url1 = " + (fusion_tables_escape(url1)) + " AND url2 = " + (fusion_tables_escape(url2)) + " AND choice NOT EQUAL TO 'skip'", function(fusion_tables_result) {
-          if ((fusion_tables_result.rows == null) || fusion_tables_result.rows[0][0] === "0") {
+          if ((depth > 2) || (fusion_tables_result.rows == null) || fusion_tables_result.rows[0][0] === "0") {
             return load_gazcomp_pair(url1, url2);
           } else {
-            return get_next_gazcomp_pair();
+            return get_next_gazcomp_pair(depth + 1);
           }
         });
       });

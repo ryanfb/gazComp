@@ -206,23 +206,23 @@ load_gazcomp_pair = (url1, url2) ->
     load_related_urls(url2,url1,2)
   )
 
-get_next_gazcomp_pair = ->
+get_next_gazcomp_pair = (depth = 0) ->
+  vote_filter_condition = if depth > 2 then "" else "WHERE choice = ''"
   # get the total number of rows
-  fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.worklist_fusion_table_id} WHERE choice IN ('', 'skip')", (fusion_tables_result) ->
+  fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.worklist_fusion_table_id} #{vote_filter_condition}", (fusion_tables_result) ->
     row_count = fusion_tables_result.rows[0][0]
     random_offset = Math.floor(Math.random() * row_count)
     # select a random row
-    fusion_tables_query "SELECT url1, url2 FROM #{gazcomp_config.worklist_fusion_table_id} WHERE choice IN ('','skip') OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
+    fusion_tables_query "SELECT url1, url2 FROM #{gazcomp_config.worklist_fusion_table_id} #{vote_filter_condition} OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
       # check that we haven't already gotten a vote on this pair
       url1 = fusion_tables_result.rows[0][0]
       url2 = fusion_tables_result.rows[0][1]
-      # this check will filter for the rare case where we got a skip-vote from the merged table, which also has a full vote
       fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.votes_fusion_table_id} WHERE url1 = #{fusion_tables_escape(url1)} AND url2 = #{fusion_tables_escape(url2)} AND choice NOT EQUAL TO 'skip'", (fusion_tables_result) =>
         # check that the random row we selected doesn't already have a vote
-        if (!fusion_tables_result.rows?) || fusion_tables_result.rows[0][0] == "0"
+        if (depth > 2) || (!fusion_tables_result.rows?) || fusion_tables_result.rows[0][0] == "0"
           load_gazcomp_pair(url1,url2)
         else
-          get_next_gazcomp_pair()
+          get_next_gazcomp_pair(depth + 1)
 
 process_gazcomp_result = (g1, g2, choice) ->
   console.log("process_gazcomp_result:")
