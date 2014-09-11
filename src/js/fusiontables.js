@@ -8,7 +8,7 @@
 
   default_gazcomp_config = {
     google_client_id: '69738617359-b0v88ji0eih9h06kdn9v8nvmlenm054e.apps.googleusercontent.com',
-    worklist_fusion_table_id: '1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP',
+    worklist_fusion_table_id: '1a2Rn7wFcmM59710Le2ZxEOZ8FsxVFBZ8PYPj9ruf',
     votes_fusion_table_id: '1VTBoUl4C-IuZqyqC2-XNjcyp4x6fjNHUiH17mBB7'
   };
 
@@ -279,11 +279,11 @@
   };
 
   get_next_gazcomp_pair = function() {
-    return fusion_tables_query("SELECT COUNT() FROM " + gazcomp_config.worklist_fusion_table_id, function(fusion_tables_result) {
+    return fusion_tables_query("SELECT COUNT() FROM " + gazcomp_config.worklist_fusion_table_id + " WHERE choice IN ('', 'skip')", function(fusion_tables_result) {
       var random_offset, row_count;
       row_count = fusion_tables_result.rows[0][0];
       random_offset = Math.floor(Math.random() * row_count);
-      return fusion_tables_query("SELECT url1, url2 FROM " + gazcomp_config.worklist_fusion_table_id + " OFFSET " + random_offset + " LIMIT 1", function(fusion_tables_result) {
+      return fusion_tables_query("SELECT url1, url2 FROM " + gazcomp_config.worklist_fusion_table_id + " WHERE choice IN ('','skip') OFFSET " + random_offset + " LIMIT 1", function(fusion_tables_result) {
         var url1, url2,
           _this = this;
         url1 = fusion_tables_result.rows[0][0];

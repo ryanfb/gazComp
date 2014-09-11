@@ -4,7 +4,7 @@ gazcomp_config = {}
 
 default_gazcomp_config =
   google_client_id: '69738617359-b0v88ji0eih9h06kdn9v8nvmlenm054e.apps.googleusercontent.com'
-  worklist_fusion_table_id: '1oIZtbS3FnxYuuH2PFtEaiwRyO1GjlB1RrkPlOSRP'
+  worklist_fusion_table_id: '1a2Rn7wFcmM59710Le2ZxEOZ8FsxVFBZ8PYPj9ruf'
   votes_fusion_table_id: '1VTBoUl4C-IuZqyqC2-XNjcyp4x6fjNHUiH17mBB7'
 
 google_oauth_parameters_for_fusion_tables =
@@ -208,17 +208,17 @@ load_gazcomp_pair = (url1, url2) ->
 
 get_next_gazcomp_pair = ->
   # get the total number of rows
-  fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.worklist_fusion_table_id}", (fusion_tables_result) ->
+  fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.worklist_fusion_table_id} WHERE choice IN ('', 'skip')", (fusion_tables_result) ->
     row_count = fusion_tables_result.rows[0][0]
     random_offset = Math.floor(Math.random() * row_count)
     # select a random row
-    fusion_tables_query "SELECT url1, url2 FROM #{gazcomp_config.worklist_fusion_table_id} OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
+    fusion_tables_query "SELECT url1, url2 FROM #{gazcomp_config.worklist_fusion_table_id} WHERE choice IN ('','skip') OFFSET #{random_offset} LIMIT 1", (fusion_tables_result) ->
       # check that we haven't already gotten a vote on this pair
       url1 = fusion_tables_result.rows[0][0]
       url2 = fusion_tables_result.rows[0][1]
+      # this check will filter for the rare case where we got a skip-vote from the merged table, which also has a full vote
       fusion_tables_query "SELECT COUNT() FROM #{gazcomp_config.votes_fusion_table_id} WHERE url1 = #{fusion_tables_escape(url1)} AND url2 = #{fusion_tables_escape(url2)} AND choice NOT EQUAL TO 'skip'", (fusion_tables_result) =>
         # check that the random row we selected doesn't already have a vote
-        # TODO: handle all-rows-voted-on case
         if (!fusion_tables_result.rows?) || fusion_tables_result.rows[0][0] == "0"
           load_gazcomp_pair(url1,url2)
         else
