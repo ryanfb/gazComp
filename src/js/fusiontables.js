@@ -8,6 +8,7 @@
 
   default_gazcomp_config = {
     google_client_id: '69738617359-b0v88ji0eih9h06kdn9v8nvmlenm054e.apps.googleusercontent.com',
+    google_scope: 'https://www.googleapis.com/auth/fusiontables https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
     worklist_fusion_table_id: '1a2Rn7wFcmM59710Le2ZxEOZ8FsxVFBZ8PYPj9ruf',
     votes_fusion_table_id: '1VTBoUl4C-IuZqyqC2-XNjcyp4x6fjNHUiH17mBB7'
   };
@@ -15,7 +16,6 @@
   google_oauth_parameters_for_fusion_tables = {
     response_type: 'token',
     redirect_uri: window.location.href.replace("" + location.hash, ''),
-    scope: 'https://www.googleapis.com/auth/fusiontables https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
     approval_prompt: 'auto'
   };
 
@@ -327,8 +327,7 @@
         }
       });
     } else {
-      $('body').append($('<div>').attr('class', 'alert alert-warning').attr('id', 'oauth_access_warning').append('You have not authorized this application to access your Google Fusion Tables, or this authorization has expired. '));
-      return $('#oauth_access_warning').append($('<a>').attr('href', google_oauth_url()).append('Click here to authorize.'));
+      return window.location = google_oauth_url();
     }
   };
 
@@ -338,6 +337,7 @@
     }
     gazcomp_config = $.extend({}, default_gazcomp_config, window.gazcomp_config);
     google_oauth_parameters_for_fusion_tables['client_id'] = gazcomp_config['google_client_id'];
+    google_oauth_parameters_for_fusion_tables['scope'] = gazcomp_config['google_scope'];
     return set_access_token_cookie(filter_url_params(parse_query_string()), build_gazcomp_driver);
   });
 
