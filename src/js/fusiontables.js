@@ -321,7 +321,7 @@
         }
       });
     } else {
-      $('body').append($('<div>').attr('class', 'alert alert-warning').attr('id', 'oauth_access_warning').append('You have not authorized this application to access your Google Fusion Tables. '));
+      $('body').append($('<div>').attr('class', 'alert alert-warning').attr('id', 'oauth_access_warning').append('You have not authorized this application to access your Google Fusion Tables, or this authorization has expired. '));
       return $('#oauth_access_warning').append($('<a>').attr('href', google_oauth_url()).append('Click here to authorize.'));
     }
   };
